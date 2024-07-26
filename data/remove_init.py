@@ -15,5 +15,7 @@ def remove_init(stocks_list):
             stocks_list.pop(i)
 
 
-stocks_list = os.listdir(os.path.join(os.path.dirname(__file__), 'stocks'))
-remove_init(stocks_list)
+if __name__ == '__main__':
+    # Demo of how to use remove_init
+    stocks_list = os.listdir(os.path.join(os.path.dirname(__file__), 'stocks'))
+    remove_init(stocks_list)
