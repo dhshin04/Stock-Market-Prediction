@@ -1,0 +1,3 @@
+# Ignore everything in stocks folder except __init__.py due to memory constraints
+data/stocks/*
+!data/stocks/__init__.py
