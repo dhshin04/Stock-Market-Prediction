@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 import os
 
-NUM_STOCKS = 25
+NUM_STOCKS = 10
 
 # Load API KEY
 load_dotenv()
@@ -16,8 +16,8 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 # Generate Response
 response = model.generate_content(
     f'''
-    Provide a list of {NUM_STOCKS} unique stocks that have been trading on NASDAQ before 2020
-    and best represent the tech industry across multiple fields. Print the stocks in 
+    Provide a list of {NUM_STOCKS} major stocks that have been trading on NASDAQ before 2020
+    and best represent the entire tech industry across multiple fields. Print the stocks in 
     this format without any other words in the response: 
     
     XXXX

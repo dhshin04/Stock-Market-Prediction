@@ -21,7 +21,13 @@ class StockDataset(Dataset):
                 (len(series) - self.window_size) // self.shift + 1
             )
     
+    def __len__(self):
+        return sum(self.len_list)
+    
     def __getitem__(self, idx):
+        if idx >= len(self):
+            raise ValueError('Provided index is too large')
+
         # Find appropriate series
         for i, length in enumerate(self.len_list):
             if idx < length:
@@ -38,6 +44,3 @@ class StockDataset(Dataset):
         labels = sequence[-self.label_size:]
 
         return features, labels
-
-    def __len__(self):
-        return sum(self.len_list)
