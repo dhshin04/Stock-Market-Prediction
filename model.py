@@ -44,7 +44,7 @@ class StockPredictor(nn.Module):
 
         # LSTM
         x = x.transpose(1, 2)
-        x, _ = self.lstm(x)
+        x, _ = self.lstm(x)     # Integrated tanh/sigmoid activation
         x = self.lstm_ln(x)
         x = self.dropout(x)
         x = x[:, -1, :]     # Only keep last timestamp's output for each sequence in batch
