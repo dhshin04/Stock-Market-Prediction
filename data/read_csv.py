@@ -36,31 +36,38 @@ def retrieve_sample():
     return stock_sample
 
 
-def csv_to_tensor(csv_files):
+def train_test_split(csv_files, train_split, test_split):
     '''
-    Converts csv files into 2D tensors
+    Converts csv files into lists of series tensors. 
+    Then, split each tensor into train, validation, and test series.
 
     Arguments:
         csv_file (list): List of csv file names
+        train_split (str): Date to split training set from val/test sets
+        test_split (str): Date to split test set from validation set
     Returns:
-        stock_data (list): List of tensors that csv files converted to
+        (tuple): Train, validation, and test series each as lists of tensors
     '''
     stocks_path = os.path.join(os.path.dirname(__file__), 'stocks')
 
-    stock_list = []
+    train_list = []
+    val_list = []
+    test_list = []
     for csv_file in csv_files:
         stock_path = os.path.join(stocks_path, csv_file)
 
         stock_data = pd.read_csv(stock_path, index_col='Date', parse_dates=['Date'])
-        stock_data = torch.tensor(stock_data.values, dtype=torch.float32)
+        series = torch.tensor(stock_data.values, dtype=torch.float32)
 
-        stock_list.append(stock_data)
+        train_split_idx = stock_data.index.get_loc(train_split)
+        test_split_idx = stock_data.index.get_loc(test_split)
 
-    return stock_list
+        train_series = series[:train_split_idx]
+        val_series = series[train_split_idx:test_split_idx]
+        test_series = series[test_split_idx:]
+        
+        train_list.append(train_series)
+        val_list.append(val_series)
+        test_list.append(test_series)
 
-
-if __name__ == '__main__':
-    stock_sample = retrieve_sample()
-    csv_files = [stock_sample[0]]
-    stock_list = csv_to_tensor(csv_files)
-    print(stock_list[0].shape)
+    return train_list, val_list, test_list
