@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 
 class StockDataset(Dataset):
     
-    def __init__(self, series_list, window_size, label_size, shift):
+    def __init__(self, device, series_list, window_size, label_size, shift):
         '''
         Arguments:
             series_list (list): List of series tensors for each stock
@@ -11,6 +11,7 @@ class StockDataset(Dataset):
             label_size (int): Size of just the labels part of sequence
             shift (int): Gap between each sequence (in days)
         '''
+        self.device = device
         self.series_list = series_list
         self.window_size = window_size
         self.label_size = label_size
@@ -40,7 +41,7 @@ class StockDataset(Dataset):
         sequence = series[start:(start + self.window_size)]
 
         # Divide sequence into features and labels
-        features = sequence[:-self.label_size]
-        labels = sequence[-self.label_size:]
+        features = sequence[:-self.label_size].to(self.device)
+        labels = sequence[-self.label_size:, 3].to(self.device)
 
         return features, labels

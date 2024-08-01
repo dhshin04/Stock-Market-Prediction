@@ -5,10 +5,11 @@ import torch.nn.functional as F
 
 class StockPredictor(nn.Module):
 
-    def __init__(self, out_channels=64, hidden_size=64, fc1_out=256, fc2_out=128, size=3, dilation=1, num_layers=3, label_size=20, dropout_rate=0.25):
+    def __init__(self, out_channels=64, hidden_size=64, fc1_out=256, fc2_out=128, size=3, dilation=1, num_layers=4, label_size=20, dropout_rate=0.25):
         super(StockPredictor, self).__init__()
         self.size = size
         self.dilation = dilation
+        self.label_size = label_size
         
         # Define Neural Network
         self.dropout = nn.Dropout(dropout_rate)
@@ -26,7 +27,7 @@ class StockPredictor(nn.Module):
         self.fc2 = nn.Linear(fc1_out, fc2_out)
         self.fc_bn2 = nn.BatchNorm1d(fc2_out)           # Batch Norm for FC
         
-        self.output = nn.Linear(fc2_out, label_size * 6)   # Output Layer
+        self.output = nn.Linear(fc2_out, label_size)    # Output Layer
 
     def forward(self, x):
         '''
@@ -59,5 +60,5 @@ class StockPredictor(nn.Module):
         x = torch.relu(x)
         x = self.dropout(x)
 
-        x = self.output(x)
+        x = self.output(x)          # (batch_size, label_size * num_features)
         return x
