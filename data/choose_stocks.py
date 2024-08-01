@@ -1,4 +1,4 @@
-''' Choose 25 unique tech stocks from available stocks list '''
+''' Choose n tech stocks from available stocks list using Gemini '''
 
 from dotenv import load_dotenv
 import google.generativeai as genai
