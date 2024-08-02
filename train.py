@@ -65,23 +65,22 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
     accuracy_list = []
 
     with torch.no_grad():   # No gradient calculation
-        count = 0
         for x_test, y_test in validation_loader:
             if scaler is not None and torch.cuda.is_available():
                 with torch.autocast(device_type='cuda', dtype=torch.float16):   # Mixed Precision
                     yhat = model(x_test)
             else:
                 yhat = model(x_test)
-            
+
             loss = torch.sqrt(criterion(yhat, y_test))      # RMSE Loss
-            if count == 0:
-                print(f'yhat: {yhat}, \ny: {y_test}\n')
-            count += 1
 
             if yhat.shape != y_test.shape:
                 raise Exception('yhat and y_test are not the same shape')
 
-            accuracy = torch.max(100 - torch.abs(yhat - y_test) / (y_test + 1e-8) * 100, torch.tensor(0.0, device=DEVICE))
+            accuracy = torch.max(
+                100 - torch.abs((yhat - y_test) / (y_test + 1e-8)) * 100,   # 1e-8 to prevent division by zero
+                torch.tensor(0.0, device=DEVICE)    # Lower bound
+            )
             
             cv_loss_list.append(loss.item())
             accuracy_list.append(
@@ -89,7 +88,7 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
             )
     
     end = time.time()
-    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.3f}, Validation Loss: {np.mean(cv_loss_list):.3f}, Average Accuracy: {np.mean(accuracy_list):.2f}, Elapsed Time: {end - start:.1f}s')
+    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.3f}, Validation Loss: {np.mean(cv_loss_list):.3f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Elapsed Time: {end - start:.1f}s')
     
     scheduler.step()            # Next step for warmup
 

@@ -65,6 +65,11 @@ def train_test_split(csv_files, train_split, test_split):
         train_series = series[:train_split_idx]
         val_series = series[train_split_idx:test_split_idx]
         test_series = series[test_split_idx:]
+
+        # Remove rows that does not have a number (no data for the day)
+        train_series = train_series[~torch.any(train_series.isnan(), dim=1)]
+        val_series = val_series[~torch.any(val_series.isnan(), dim=1)]
+        test_series = test_series[~torch.any(test_series.isnan(), dim=1)]
         
         train_list.append(train_series)
         val_list.append(val_series)
