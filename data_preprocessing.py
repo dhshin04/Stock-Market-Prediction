@@ -1,5 +1,7 @@
 ''' Preprocess data to usable format by model '''
+import torch
 from torch.utils.data import DataLoader
+from sklearn.preprocessing import MinMaxScaler
 from data.dataset import StockDataset
 from data.read_csv import retrieve_sample, train_test_split
 
@@ -9,6 +11,7 @@ def create_datasets(device, train_split, test_split, window_size, label_size, sh
     stock_sample = retrieve_sample()
     train_list, val_list, test_list = train_test_split(stock_sample, train_split, test_split)
 
+    # Create Stock Dataset
     training_set = StockDataset(device, train_list, window_size, label_size, shift)
     val_set = StockDataset(device, val_list, window_size, label_size, shift)
     test_set = StockDataset(device, test_list, window_size, label_size, shift)

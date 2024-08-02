@@ -1,4 +1,6 @@
+import torch
 from torch.utils.data import Dataset
+from sklearn.preprocessing import MinMaxScaler
 
 
 class StockDataset(Dataset):
@@ -26,8 +28,8 @@ class StockDataset(Dataset):
         return sum(self.len_list)
     
     def __getitem__(self, idx):
-        if idx >= len(self):
-            raise ValueError('Provided index is too large')
+        if idx >= len(self) or idx < 0:
+            raise IndexError('Provided index is out of bounds')
 
         # Find appropriate series
         for i, length in enumerate(self.len_list):
@@ -41,7 +43,18 @@ class StockDataset(Dataset):
         sequence = series[start:(start + self.window_size)]
 
         # Divide sequence into features and labels
-        features = sequence[:-self.label_size].to(self.device)
-        labels = sequence[-self.label_size:, 3].to(self.device)
+        features = sequence[:-self.label_size]
+        labels = sequence[-self.label_size:]
 
-        return features, labels
+        # Normalize features and labels
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        features_scaled = scaler.fit_transform(features.numpy())
+        labels_scaled = scaler.transform(labels.numpy())
+
+        features_scaled = torch.from_numpy(features_scaled)
+        labels_scaled = torch.from_numpy(labels_scaled)
+
+        # Extract just closing price as labels
+        labels_scaled = labels_scaled[:, 3]
+
+        return features_scaled.to(self.device), labels_scaled.to(self.device)
