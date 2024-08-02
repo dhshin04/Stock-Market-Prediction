@@ -36,7 +36,7 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
 
     start = time.time()
     for batch_index, (x, y) in enumerate(train_loader):   # Mini-Batch Gradient Descent
-        if scaler is not None:
+        if scaler is not None and torch.cuda.is_available():
             with torch.autocast(device_type='cuda', dtype=torch.float16):   # Mixed Precision
                 yhat = model(x)        # Returns dictionary of losses
         else:
@@ -45,7 +45,7 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
         loss = torch.sqrt(criterion(yhat, y)) / accumulation_size
         train_loss_list.append(loss.item())
         
-        if scaler is not None:
+        if scaler is not None and torch.cuda.is_available():
             scaler.scale(loss).backward()         # Compute gradient of loss
         else:
             loss.backward()
@@ -64,24 +64,29 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
     cv_loss_list = []       # Contains val loss per batch
     accuracy_list = []
 
-    for x_test, y_test in validation_loader:
-        if scaler is not None:
-            with torch.autocast(device_type='cuda', dtype=torch.float16):   # Mixed Precision
+    with torch.no_grad():   # No gradient calculation
+        count = 0
+        for x_test, y_test in validation_loader:
+            if scaler is not None and torch.cuda.is_available():
+                with torch.autocast(device_type='cuda', dtype=torch.float16):   # Mixed Precision
+                    yhat = model(x_test)
+            else:
                 yhat = model(x_test)
-                loss = torch.sqrt(criterion(yhat, y_test))      # RMSE Loss
-        else:
-            yhat = model(x_test)
+            
             loss = torch.sqrt(criterion(yhat, y_test))      # RMSE Loss
+            if count == 0:
+                print(f'yhat: {yhat}, \ny: {y_test}\n')
+            count += 1
 
-        if yhat.shape != y_test.shape:
-            raise Exception('yhat and y_test are not the same shape')
+            if yhat.shape != y_test.shape:
+                raise Exception('yhat and y_test are not the same shape')
 
-        accuracy = torch.max(100 - torch.abs(yhat - y_test) / (y_test + 1e-8) * 100, torch.tensor(0.0, device=DEVICE))
-        
-        cv_loss_list.append(loss.item())
-        accuracy_list.append(
-            np.mean(accuracy.to('cpu').numpy())       # Average accuracy of batch
-        )
+            accuracy = torch.max(100 - torch.abs(yhat - y_test) / (y_test + 1e-8) * 100, torch.tensor(0.0, device=DEVICE))
+            
+            cv_loss_list.append(loss.item())
+            accuracy_list.append(
+                np.mean(accuracy.to('cpu').numpy())       # Average accuracy of batch
+            )
     
     end = time.time()
     print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.3f}, Validation Loss: {np.mean(cv_loss_list):.3f}, Average Accuracy: {np.mean(accuracy_list):.2f}, Elapsed Time: {end - start:.1f}s')
