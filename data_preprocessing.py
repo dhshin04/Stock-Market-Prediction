@@ -7,8 +7,7 @@ from data.read_csv import retrieve_sample, train_test_split
 def create_datasets(device, train_split, test_split, window_size, label_size, shift):
     # Train-Val-Test Split
     stock_sample = retrieve_sample()
-    csv_files = [stock_sample[0]]
-    train_list, val_list, test_list = train_test_split(csv_files, train_split, test_split)
+    train_list, val_list, test_list = train_test_split(stock_sample, train_split, test_split)
 
     training_set = StockDataset(device, train_list, window_size, label_size, shift)
     val_set = StockDataset(device, val_list, window_size, label_size, shift)
