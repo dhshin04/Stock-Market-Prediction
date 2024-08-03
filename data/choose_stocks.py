@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 import os
 
-NUM_STOCKS = 10
+NUM_STOCKS = 15
 START_DATE = 'before January 2000'
 END_DATE = 'April 2020'
 

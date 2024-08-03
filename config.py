@@ -19,11 +19,10 @@ fc1_out = 256                   # Units in first FC layer
 fc2_out = 128                   # Units in second FC layer
 size = 3                        # Kernel size for CNN
 dilation = 1                    # Dilation for CNN
-num_layers = 4                  # Number of LSTM layers
+num_layers = 5                  # Number of LSTM layers
 dropout_rate = 0.25             # For Dropout Regularization
 
 # Train Loop
-accumulation_size = 1           # For Gradient Accumulation
 learning_rate = 1e-6            # For Training
 epochs = 100                    # For Training
 warmup_step = 10                # For LambdaLR Warmup
