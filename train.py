@@ -1,6 +1,7 @@
 from config import *        # Contains DEVICE and hyperparameters
 from data_preprocessing import load_data
 from model import StockPredictor
+import metrics
 
 import os, time
 import numpy as np
@@ -74,14 +75,11 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
             if yhat.shape != y_test.shape:
                 raise Exception('yhat and y_test are not the same shape')
 
-            accuracy = torch.max(
-                100 - torch.abs((yhat - y_test) / (y_test + 1e-8)) * 100,   # 1e-8 to prevent division by zero
-                torch.tensor(0.0, device=DEVICE)    # Lower bound
-            )
+            accuracy = metrics.accuracy(yhat, y_test, device=DEVICE)
             
             cv_loss_list.append(loss.item())
             accuracy_list.append(
-                np.mean(accuracy.to('cpu').numpy())       # Average accuracy of batch
+                np.mean(accuracy)       # Average accuracy of batch
             )
     
     end = time.time()
@@ -93,7 +91,7 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
 def main():
     ''' Data Loading '''
     train_loader, validation_loader, _ = load_data(
-        DEVICE, train_split, test_split, window_size, label_size, shift, train_batch, cv_batch,
+        start_date, train_split, test_split, window_size, label_size, shift, train_batch, cv_batch,
     )
 
     model = StockPredictor(

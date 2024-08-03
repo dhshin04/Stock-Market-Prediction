@@ -36,7 +36,7 @@ def retrieve_sample():
     return stock_sample
 
 
-def train_test_split(csv_files, train_split, test_split):
+def train_test_split(csv_files, start_date, train_split, test_split):
     '''
     Converts csv files into lists of series tensors. 
     Then, split each tensor into train, validation, and test series.
@@ -76,3 +76,11 @@ def train_test_split(csv_files, train_split, test_split):
         test_list.append(test_series)
 
     return train_list, val_list, test_list
+
+
+if __name__ == '__main__':
+    import sys
+    sys.path.append(os.path.abspath('..'))
+    from config import *
+    stock_sample = retrieve_sample()
+    train_list, val_list, test_list = train_test_split(stock_sample, start_date, train_split, test_split)
