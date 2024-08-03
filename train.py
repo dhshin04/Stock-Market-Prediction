@@ -36,13 +36,17 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
 
     start = time.time()
     for batch_index, (x, y) in enumerate(train_loader):   # Mini-Batch Gradient Descent
+        x = x.to(DEVICE)
+        y = y.to(DEVICE)
+
         if scaler is not None and torch.cuda.is_available():
             with torch.autocast(device_type='cuda', dtype=torch.float16):   # Mixed Precision
                 yhat = model(x)        # Returns dictionary of losses
+                loss = torch.sqrt(criterion(yhat, y)) / accumulation_size
         else:
             yhat = model(x)
+            loss = torch.sqrt(criterion(yhat, y)) / accumulation_size
         
-        loss = torch.sqrt(criterion(yhat, y)) / accumulation_size
         train_loss_list.append(loss.item())
         
         if scaler is not None and torch.cuda.is_available():
@@ -66,12 +70,10 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
 
     with torch.no_grad():   # No gradient calculation
         for x_test, y_test in validation_loader:
-            if scaler is not None and torch.cuda.is_available():
-                with torch.autocast(device_type='cuda', dtype=torch.float16):   # Mixed Precision
-                    yhat = model(x_test)
-            else:
-                yhat = model(x_test)
+            x_test = x_test.to(DEVICE)
+            y_test = y_test.to(DEVICE)
 
+            yhat = model(x_test)
             loss = torch.sqrt(criterion(yhat, y_test))      # RMSE Loss
 
             if yhat.shape != y_test.shape:
@@ -110,9 +112,9 @@ def main():
     criterion = nn.MSELoss()
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
-    warmup_scheduler = LambdaLR(optimizer, lr_lambda=warmup)                     # LR Warmup to Complement AdamW
-    cos_scheduler = CosineAnnealingLR(optimizer, T_max=T_max, eta_min=eta_min)   # LR Scheduler to Complement AdamW
-    scheduler = SequentialLR(optimizer, schedulers=[warmup_scheduler, cos_scheduler], milestones=[warmup_step])
+    scheduler = LambdaLR(optimizer, lr_lambda=warmup)                     # LR Warmup to Complement AdamW
+    # cos_scheduler = CosineAnnealingLR(optimizer, T_max=T_max, eta_min=eta_min)   # LR Scheduler to Complement AdamW
+    # scheduler = SequentialLR(optimizer, schedulers=[warmup_scheduler, cos_scheduler], milestones=[warmup_step])
     
     if torch.cuda.is_available():
         scaler = GradScaler()   # Mixed Precision for faster training

@@ -12,9 +12,9 @@ def create_datasets(device, train_split, test_split, window_size, label_size, sh
     train_list, val_list, test_list = train_test_split(stock_sample, train_split, test_split)
 
     # Create Stock Dataset
-    training_set = StockDataset(device, train_list, window_size, label_size, shift)
-    val_set = StockDataset(device, val_list, window_size, label_size, shift)
-    test_set = StockDataset(device, test_list, window_size, label_size, shift)
+    training_set = StockDataset(train_list, window_size, label_size, shift)
+    val_set = StockDataset(val_list, window_size, label_size, shift)
+    test_set = StockDataset(test_list, window_size, label_size, shift)
 
     return training_set, val_set, test_set
 
