@@ -35,33 +35,28 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
     train_loss_list = []        # Contains train loss per batch
 
     start = time.time()
-    for batch_index, (x, y) in enumerate(train_loader):   # Mini-Batch Gradient Descent
+    for x, y in train_loader:   # Mini-Batch Gradient Descent
         x = x.to(DEVICE)
         y = y.to(DEVICE)
 
         if scaler is not None and torch.cuda.is_available():
             with torch.autocast(device_type='cuda', dtype=torch.float16):   # Mixed Precision
                 yhat = model(x)        # Returns dictionary of losses
-                loss = torch.sqrt(criterion(yhat, y)) / accumulation_size
+                loss = torch.sqrt(criterion(yhat, y))
         else:
             yhat = model(x)
-            loss = torch.sqrt(criterion(yhat, y)) / accumulation_size
+            loss = torch.sqrt(criterion(yhat, y))
         
         train_loss_list.append(loss.item())
         
         if scaler is not None and torch.cuda.is_available():
             scaler.scale(loss).backward()         # Compute gradient of loss
+            scaler.step(optimizer)     # Update parameters
+            scaler.update()
         else:
             loss.backward()
-
-        # Gradient Accumulation (if applicable)
-        if (batch_index + 1) % accumulation_size == 0 or (batch_index + 1) == len(train_loader):
-            if scaler is not None:
-                scaler.step(optimizer)     # Update parameters
-                scaler.update()
-            else:
-                optimizer.step()
-            optimizer.zero_grad()      # clear old gradient before new gradient calculation
+            optimizer.step()
+        optimizer.zero_grad()      # clear old gradient before new gradient calculation
         
     # Evaluate
     model.eval()            # Evaluation Mode: requires_grad=False, Batch Norm off
@@ -90,7 +85,7 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
             )
     
     end = time.time()
-    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.3f}, Validation Loss: {np.mean(cv_loss_list):.3f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Elapsed Time: {end - start:.1f}s')
+    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Validation Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Elapsed Time: {end - start:.1f}s')
     
     scheduler.step()            # Next step for warmup
 
@@ -112,9 +107,9 @@ def main():
     criterion = nn.MSELoss()
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
-    scheduler = LambdaLR(optimizer, lr_lambda=warmup)                     # LR Warmup to Complement AdamW
-    # cos_scheduler = CosineAnnealingLR(optimizer, T_max=T_max, eta_min=eta_min)   # LR Scheduler to Complement AdamW
-    # scheduler = SequentialLR(optimizer, schedulers=[warmup_scheduler, cos_scheduler], milestones=[warmup_step])
+    warmup_scheduler = LambdaLR(optimizer, lr_lambda=warmup)                     # LR Warmup to Complement AdamW
+    cos_scheduler = CosineAnnealingLR(optimizer, T_max=T_max, eta_min=eta_min)   # LR Scheduler to Complement AdamW
+    scheduler = SequentialLR(optimizer, schedulers=[warmup_scheduler, cos_scheduler], milestones=[warmup_step])
     
     if torch.cuda.is_available():
         scaler = GradScaler()   # Mixed Precision for faster training
