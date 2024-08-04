@@ -8,10 +8,10 @@ import metrics
 
 def main():
     if no_val:
-        model_name = 'model.pth'
+        model_name = 'second_model.pth'
     else:
-        model_name = 'original_model.pth'
-        
+        model_name = 'first_model.pth'
+
     checkpoint_path = os.path.join(os.path.dirname(__file__), 'saved_models', model_name)
     checkpoint = torch.load(checkpoint_path, map_location=DEVICE, weights_only=True)
 

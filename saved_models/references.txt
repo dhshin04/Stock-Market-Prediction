@@ -1,0 +1,8 @@
+first_model.pth is the model that was trained only using the training set.
+    Validation set was used to tune the hyperparameters.
+
+second_model.pth is the model that was trained using both the training and val sets.
+    Test set was used to evaluate the performance of the model.
+
+final_model.pth is the model trained using all three training, val, and test sets.
+    It is the model used to predict on real-time data. 
