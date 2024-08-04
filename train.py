@@ -91,7 +91,7 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
 def main():
     ''' Data Loading '''
     train_loader, validation_loader, _ = load_data(
-        start_date, train_split, test_split, window_size, label_size, shift, train_batch, cv_batch,
+        train_split, test_split, window_size, label_size, shift, train_batch, cv_batch,
     )
 
     model = StockPredictor(

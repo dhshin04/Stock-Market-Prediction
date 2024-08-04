@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import torch
+from config import lag, ma_window
 
 
 def get_stocks():
@@ -36,7 +37,39 @@ def retrieve_sample():
     return stock_sample
 
 
-def train_test_split(csv_files, start_date, train_split, test_split):
+def remove_noise(dataframe, lag=5, ma_window=10):
+    '''
+    Use differencing and moving average to remove noise while preserving trend
+
+    Arguments:
+        dataframe (pd.DataFrame): Original dataframe without noise removal
+        lag (int): Size of lag for differencing
+        ma_window (int): Window size to compute moving average
+    Returns:
+        new_df (pd.DataFrame): New dataframe with noise removed
+    '''
+    new_df = pd.DataFrame(index=dataframe.index)
+    for column in dataframe:
+        # Get series
+        series = dataframe[column]
+
+        # Find series(t - lag)
+        series_lag = series.shift(lag)
+
+        # Calculate differenced series
+        series_diff = series - series_lag
+
+        # Calculate moving averages of lagged series and differenced series
+        ma_lag = series_lag.rolling(window=ma_window).mean()
+        ma_diff = series_diff.rolling(window=ma_window).mean()
+
+        # Add the two moving averages and add to dataframe
+        new_df[column] = ma_lag + ma_diff
+    
+    return new_df.dropna()      # Remove NaN that could arise from differencing or moving average
+
+
+def train_test_split(csv_files, train_split, test_split):
     '''
     Converts csv files into lists of series tensors. 
     Then, split each tensor into train, validation, and test series.
@@ -57,6 +90,7 @@ def train_test_split(csv_files, start_date, train_split, test_split):
         stock_path = os.path.join(stocks_path, csv_file)
 
         stock_data = pd.read_csv(stock_path, index_col='Date', parse_dates=['Date'])
+        stock_data = remove_noise(stock_data, lag, ma_window)
         series = torch.tensor(stock_data.values, dtype=torch.float32)
 
         train_split_idx = stock_data.index.get_loc(train_split)
@@ -76,11 +110,3 @@ def train_test_split(csv_files, start_date, train_split, test_split):
         test_list.append(test_series)
 
     return train_list, val_list, test_list
-
-
-if __name__ == '__main__':
-    import sys
-    sys.path.append(os.path.abspath('..'))
-    from config import *
-    stock_sample = retrieve_sample()
-    train_list, val_list, test_list = train_test_split(stock_sample, start_date, train_split, test_split)

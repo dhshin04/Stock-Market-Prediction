@@ -6,10 +6,10 @@ from data.dataset import StockDataset
 from data.read_csv import retrieve_sample, train_test_split
 
 
-def create_datasets(start_date, train_split, test_split, window_size, label_size, shift):
+def create_datasets(train_split, test_split, window_size, label_size, shift):
     # Train-Val-Test Split
     stock_sample = retrieve_sample()
-    train_list, val_list, test_list = train_test_split(stock_sample, start_date, train_split, test_split)
+    train_list, val_list, test_list = train_test_split(stock_sample, train_split, test_split)
 
     # Create Stock Dataset
     training_set = StockDataset(train_list, window_size, label_size, shift)
@@ -19,7 +19,7 @@ def create_datasets(start_date, train_split, test_split, window_size, label_size
     return training_set, val_set, test_set
 
 
-def load_data(start_date, train_split, test_split, window_size, label_size, shift, train_batch=64, cv_batch=64, test_batch=64):
+def load_data(train_split, test_split, window_size, label_size, shift, train_batch=64, cv_batch=64, test_batch=64):
     '''
     Turn Dataset into DataLoader
 
@@ -32,7 +32,7 @@ def load_data(start_date, train_split, test_split, window_size, label_size, shif
     '''
 
     # Load Dataset
-    training_set, val_set, test_set = create_datasets(start_date, train_split, test_split, window_size, label_size, shift)
+    training_set, val_set, test_set = create_datasets(train_split, test_split, window_size, label_size, shift)
 
     workers = {
         'num_workers': 6,           # To speed up data transfer between CPU and GPU
