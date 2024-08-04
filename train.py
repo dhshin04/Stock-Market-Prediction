@@ -30,7 +30,7 @@ def warmup(epoch):
     return 1.
 
 
-def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, criterion, optimizer, scheduler):
+def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, criterion, optimizer, scheduler, val_loss_list):
     # Train
     model.train()               # Train Mode: requires_grad=True, Batch Norm on
     train_loss_list = []        # Contains train loss per batch
@@ -88,9 +88,11 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
             )
     
     end = time.time()
-    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Validation Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Directional Accuracy: {np.mean(dir_acc_list)}, Elapsed Time: {end - start:.1f}s')
+    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Validation Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Directional Accuracy: {np.mean(dir_acc_list):.2f}%, Elapsed Time: {end - start:.1f}s')
     
     scheduler.step()            # Next step for warmup
+
+    val_loss_list.append(np.mean(cv_loss_list))
 
 
 def main():
@@ -121,11 +123,16 @@ def main():
     
     # Train and Evaluate Model
     print('Training...')
+    val_loss_list = []
     for epoch in range(epochs):
         train_one_epoch(
             epoch, model, train_loader, validation_loader, 
-            scaler, criterion, optimizer, scheduler,
+            scaler, criterion, optimizer, scheduler, val_loss_list
         )
+        
+        if epoch >= early_stop_epoch:
+            if (val_loss_list[epoch - early_stop_epoch] - val_loss_list[epoch]) < early_stop_threhsold:
+                break
 
     # Save Model
     checkpoint_path = os.path.join(os.path.dirname(__file__), 'saved_models', 'model.pth')
