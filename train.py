@@ -10,7 +10,6 @@ from torch import nn, optim
 from torch.optim.lr_scheduler import LambdaLR, CosineAnnealingLR, SequentialLR
 import torch.multiprocessing as mp
 from torch.amp import GradScaler
-torch.manual_seed(1234)
 
 # Enable TF32 mode for matrix multiplications - ensure speed + accuracy for Mixed Precision
 torch.backends.cuda.matmul.allow_tf32 = True

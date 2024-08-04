@@ -1,4 +1,5 @@
 import torch
+torch.manual_seed(1234)
 
 DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 

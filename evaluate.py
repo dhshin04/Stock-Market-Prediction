@@ -5,7 +5,6 @@ from data_preprocessing import load_data
 from model import StockPredictor
 from config import *
 import metrics
-torch.manual_seed(1234)
 
 
 def main():
@@ -21,8 +20,8 @@ def main():
         checkpoint_path = os.path.join(os.path.dirname(__file__), 'saved_models', model_name)
         checkpoint = torch.load(checkpoint_path, map_location=DEVICE, weights_only=True)
 
-        train_loader, validation_loader, test_loader = load_data(
-            train_split, test_split, window_size, label_size, shift, train_batch, cv_batch, test_batch, no_val=no_val,
+        _, validation_loader, test_loader = load_data(
+            train_split, test_split, window_size, label_size, shift, train_batch, cv_batch, test_batch, no_val=no_val, no_test=no_test,
         )
 
         model = StockPredictor(
@@ -32,10 +31,11 @@ def main():
         model.load_state_dict(checkpoint)
         model.to(DEVICE)
 
+        model.eval()            # Evaluation Mode: requires_grad=False, Batch Norm off
+
         if not no_val:
             # Validation Performance
             start = time.time()
-            model.eval()            # Evaluation Mode: requires_grad=False, Batch Norm off
             accuracy_list = []      # List of accuracy (100 - MAPE)
             dir_acc_list = []
 
