@@ -4,7 +4,7 @@ from data.dataset import StockDataset
 from data.read_csv import retrieve_sample, train_val_test_split
 
 
-def create_datasets(train_split, test_split, window_size, label_size, shift, no_val):
+def create_datasets(train_split, test_split, window_size, label_size, shift, no_val, no_test):
     # Train-Val-Test Split
     stock_sample = retrieve_sample()
     train_list, val_list, test_list = train_val_test_split(stock_sample, train_split, test_split, no_val)
@@ -12,14 +12,17 @@ def create_datasets(train_split, test_split, window_size, label_size, shift, no_
     # Create Stock Dataset
     training_set = StockDataset(train_list, window_size, label_size, shift)
     val_set = None
-    test_set = StockDataset(test_list, window_size, label_size, shift=label_size)
-    if not no_val:
-        val_set = StockDataset(val_list, window_size, label_size, shift=label_size)
+    test_set = None
+
+    if not no_test:
+        test_set = StockDataset(test_list, window_size, label_size, shift=label_size)
+        if not no_val:
+            val_set = StockDataset(val_list, window_size, label_size, shift=label_size)
 
     return training_set, val_set, test_set
 
 
-def load_data(train_split, test_split, window_size, label_size, shift, train_batch=64, cv_batch=64, test_batch=64, no_val=False):
+def load_data(train_split, test_split, window_size, label_size, shift, train_batch=64, cv_batch=64, test_batch=64, no_val=False, no_test=False):
     '''
     Turn Dataset into DataLoader
 
@@ -32,7 +35,7 @@ def load_data(train_split, test_split, window_size, label_size, shift, train_bat
     '''
 
     # Load Dataset
-    training_set, val_set, test_set = create_datasets(train_split, test_split, window_size, label_size, shift, no_val)
+    training_set, val_set, test_set = create_datasets(train_split, test_split, window_size, label_size, shift, no_val, no_test)
 
     workers = {
         'num_workers': 6,           # To speed up data transfer between CPU and GPU
@@ -47,19 +50,23 @@ def load_data(train_split, test_split, window_size, label_size, shift, train_bat
         shuffle=True,
         **workers,
     )
+
     validation_loader = None
-    if not no_val:
+    if not no_test and not no_val:
         validation_loader = DataLoader(      
             dataset=val_set, 
             batch_size=cv_batch,
             shuffle=False,
             **workers,
         )
-    test_loader = DataLoader(      
-        dataset=test_set, 
-        batch_size=test_batch,
-        shuffle=False,
-        **workers,
-    )
+        
+    test_loader = None
+    if not no_test:
+        test_loader = DataLoader(      
+            dataset=test_set, 
+            batch_size=test_batch,
+            shuffle=False,
+            **workers,
+        )
 
     return train_loader, validation_loader, test_loader

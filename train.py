@@ -30,7 +30,7 @@ def warmup(epoch):
     return 1.
 
 
-def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, criterion, optimizer, scheduler, val_loss_list):
+def train_one_epoch(epoch, model, train_loader, evaluation_loader, scaler, criterion, optimizer, scheduler, val_loss_list):
     # Train
     model.train()               # Train Mode: requires_grad=True, Batch Norm on
     train_loss_list = []        # Contains train loss per batch
@@ -60,12 +60,15 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
         optimizer.zero_grad()      # clear old gradient before new gradient calculation
         
     # Evaluate
+    if evaluation_loader is None:
+        return
+
     model.eval()            # Evaluation Mode: requires_grad=False, Batch Norm off
     cv_loss_list = []       # Contains val loss per batch
     accuracy_list = []      # List of accuracy (100 - MAPE)
 
     with torch.no_grad():   # No gradient calculation
-        for x_test, y_test in validation_loader:
+        for x_test, y_test in evaluation_loader:
             x_test = x_test.to(DEVICE)
             y_test = y_test.to(DEVICE)
 
@@ -93,10 +96,12 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
 def main():
     ''' Data Loading '''
     train_loader, validation_loader, test_loader = load_data(
-        train_split, test_split, window_size, label_size, shift, train_batch, cv_batch, test_batch, no_val=no_val,
+        train_split, test_split, window_size, label_size, shift, train_batch, cv_batch, test_batch, no_val=no_val, no_test=no_test,
     )
 
-    if not no_val:
+    if no_test:
+        evaluation_loader = None
+    elif not no_val:
         evaluation_loader = validation_loader
     else:
         evaluation_loader = test_loader

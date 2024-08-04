@@ -33,5 +33,5 @@ T_max = epochs                  # For CosineAnnealingLR
 eta_min = learning_rate / 50    # For CosineAnnealingLR
 
 # Train Variation
-no_val = False                   # Use validation set for training as well
+no_val = True                   # Use validation set for training as well
 no_test = False                 # Use test set for training as well
