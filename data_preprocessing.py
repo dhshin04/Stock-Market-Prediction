@@ -1,23 +1,25 @@
 ''' Preprocess data to usable format by model '''
 from torch.utils.data import DataLoader
 from data.dataset import StockDataset
-from data.read_csv import retrieve_sample, train_test_split
+from data.read_csv import retrieve_sample, train_val_test_split
 
 
-def create_datasets(train_split, test_split, window_size, label_size, shift):
+def create_datasets(train_split, test_split, window_size, label_size, shift, no_val):
     # Train-Val-Test Split
     stock_sample = retrieve_sample()
-    train_list, val_list, test_list = train_test_split(stock_sample, train_split, test_split)
+    train_list, val_list, test_list = train_val_test_split(stock_sample, train_split, test_split, no_val)
 
     # Create Stock Dataset
     training_set = StockDataset(train_list, window_size, label_size, shift)
-    val_set = StockDataset(val_list, window_size, label_size, shift=label_size)
+    val_set = None
     test_set = StockDataset(test_list, window_size, label_size, shift=label_size)
+    if not no_val:
+        val_set = StockDataset(val_list, window_size, label_size, shift=label_size)
 
     return training_set, val_set, test_set
 
 
-def load_data(train_split, test_split, window_size, label_size, shift, train_batch=64, cv_batch=64, test_batch=64):
+def load_data(train_split, test_split, window_size, label_size, shift, train_batch=64, cv_batch=64, test_batch=64, no_val=False):
     '''
     Turn Dataset into DataLoader
 
@@ -30,7 +32,7 @@ def load_data(train_split, test_split, window_size, label_size, shift, train_bat
     '''
 
     # Load Dataset
-    training_set, val_set, test_set = create_datasets(train_split, test_split, window_size, label_size, shift)
+    training_set, val_set, test_set = create_datasets(train_split, test_split, window_size, label_size, shift, no_val)
 
     workers = {
         'num_workers': 6,           # To speed up data transfer between CPU and GPU
@@ -45,12 +47,14 @@ def load_data(train_split, test_split, window_size, label_size, shift, train_bat
         shuffle=True,
         **workers,
     )
-    validation_loader = DataLoader(      
-        dataset=val_set, 
-        batch_size=cv_batch,
-        shuffle=False,
-        **workers,
-    )
+    validation_loader = None
+    if not no_val:
+        validation_loader = DataLoader(      
+            dataset=val_set, 
+            batch_size=cv_batch,
+            shuffle=False,
+            **workers,
+        )
     test_loader = DataLoader(      
         dataset=test_set, 
         batch_size=test_batch,

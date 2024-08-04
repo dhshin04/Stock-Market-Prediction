@@ -12,6 +12,7 @@ label_size = 20                 # Approximately 1 month of trading time
 shift = 1                       # Sequence shift by 1 day
 train_batch = 32                # Train Loader Batch Size
 cv_batch = 256                  # Validation Loader Batch Size
+test_batch = 64                 # Test Loader Batch Size
 
 # Model Definition
 out_channels = 96               # Units in CNN
@@ -25,10 +26,12 @@ dropout_rate = 0.3              # For Dropout Regularization
 
 # Train Loop
 learning_rate = 3e-6            # For Training - best 3e-6, try 1e-6 and 1e-5
-epochs = 100                     # For Training
+epochs = 60                     # For Training
 warmup_step = 10                # For LambdaLR Warmup
 weight_decay = 0.01             # For AdamW 
 T_max = epochs                  # For CosineAnnealingLR
 eta_min = learning_rate / 50    # For CosineAnnealingLR
-early_stop_epoch = 20           # For Early Stopping
-early_stop_threhsold = 10.0     # For Early Stopping
+
+# Train Variation
+no_val = False                   # Use validation set for training as well
+no_test = False                 # Use test set for training as well

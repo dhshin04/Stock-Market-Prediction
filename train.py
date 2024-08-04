@@ -83,7 +83,7 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
             )
     
     end = time.time()
-    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Validation Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Elapsed Time: {end - start:.1f}s')
+    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Test Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Elapsed Time: {end - start:.1f}s')
     
     scheduler.step()            # Next step for warmup
 
@@ -92,9 +92,14 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
 
 def main():
     ''' Data Loading '''
-    train_loader, validation_loader, _ = load_data(
-        train_split, test_split, window_size, label_size, shift, train_batch, cv_batch,
+    train_loader, validation_loader, test_loader = load_data(
+        train_split, test_split, window_size, label_size, shift, train_batch, cv_batch, test_batch, no_val=no_val,
     )
+
+    if not no_val:
+        evaluation_loader = validation_loader
+    else:
+        evaluation_loader = test_loader
 
     model = StockPredictor(
         out_channels, hidden_size, fc1_out, fc2_out, size, 
@@ -122,15 +127,10 @@ def main():
     val_loss_list = []
     for epoch in range(epochs):
         train_one_epoch(
-            epoch, model, train_loader, validation_loader, 
+            epoch, model, train_loader, evaluation_loader, 
             scaler, criterion, optimizer, scheduler, val_loss_list
         )
         
-        if epoch == 59:
-            early_stop = input('Early stop?')
-            if early_stop == 'y' or early_stop == 'yes':
-                break
-
     # Save Model
     checkpoint_path = os.path.join(os.path.dirname(__file__), 'saved_models', 'model.pth')
     torch.save(model.state_dict(), checkpoint_path)

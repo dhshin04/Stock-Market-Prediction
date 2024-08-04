@@ -36,7 +36,7 @@ def retrieve_sample():
     return stock_sample
 
 
-def train_test_split(csv_files, train_split, test_split):
+def train_val_test_split(csv_files, train_split, test_split, no_val=False):
     '''
     Converts csv files into lists of series tensors. 
     Then, split each tensor into train, validation, and test series.
@@ -64,12 +64,16 @@ def train_test_split(csv_files, train_split, test_split):
         train_split_idx = stock_data.index.get_loc(train_split)
         test_split_idx = stock_data.index.get_loc(test_split)
 
-        train_series = series[:train_split_idx]
-        val_series = series[train_split_idx:test_split_idx]
+        if not no_val:
+            train_series = series[:train_split_idx]
+            val_series = series[train_split_idx:test_split_idx]
+        else:
+            train_series = series[:test_split_idx]
         test_series = series[test_split_idx:]
 
         train_list.append(train_series)
-        val_list.append(val_series)
+        if not no_val:
+            val_list.append(val_series)
         test_list.append(test_series)
 
     return train_list, val_list, test_list
