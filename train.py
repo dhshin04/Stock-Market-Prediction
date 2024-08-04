@@ -97,7 +97,8 @@ def main():
     )
 
     model = StockPredictor(
-        out_channels, hidden_size, fc1_out, fc2_out, size, dilation, num_layers, label_size, dropout_rate,
+        out_channels, hidden_size, fc1_out, fc2_out, size, 
+        dilation, num_layers, label_size, dropout_rate,
     )
 
     model.to(DEVICE)
