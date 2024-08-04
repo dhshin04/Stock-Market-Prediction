@@ -62,7 +62,8 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
     # Evaluate
     model.eval()            # Evaluation Mode: requires_grad=False, Batch Norm off
     cv_loss_list = []       # Contains val loss per batch
-    accuracy_list = []
+    accuracy_list = []      # List of accuracy (100 - MAPE)
+    dir_acc_list = []       # List of directional accuracy
 
     with torch.no_grad():   # No gradient calculation
         for x_test, y_test in validation_loader:
@@ -76,14 +77,18 @@ def train_one_epoch(epoch, model, train_loader, validation_loader, scaler, crite
                 raise Exception('yhat and y_test are not the same shape')
 
             accuracy = metrics.accuracy(yhat, y_test, device=DEVICE)
+            dir_acc = metrics.directional_accuracy(x_test, yhat, y_test)
             
             cv_loss_list.append(loss.item())
             accuracy_list.append(
                 np.mean(accuracy)       # Average accuracy of batch
             )
+            dir_acc_list.append(
+                np.mean(dir_acc)
+            )
     
     end = time.time()
-    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Validation Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Elapsed Time: {end - start:.1f}s')
+    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Validation Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Directional Accuracy: {np.mean(dir_acc_list)}, Elapsed Time: {end - start:.1f}s')
     
     scheduler.step()            # Next step for warmup
 
