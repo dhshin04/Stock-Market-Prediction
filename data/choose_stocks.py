@@ -8,7 +8,7 @@ import pandas as pd
 sys.path.append(os.path.abspath('..'))
 from config import start_date
 
-NUM_STOCKS = 40
+NUM_STOCKS = 20
 START_DATE = 'before January 2000'
 END_DATE = 'April 2020'
 

@@ -1,7 +1,5 @@
 ''' Preprocess data to usable format by model '''
-import torch
 from torch.utils.data import DataLoader
-from sklearn.preprocessing import MinMaxScaler
 from data.dataset import StockDataset
 from data.read_csv import retrieve_sample, train_test_split
 
