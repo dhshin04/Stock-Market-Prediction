@@ -136,7 +136,14 @@ def main():
         )
         
     # Save Model
-    checkpoint_path = os.path.join(os.path.dirname(__file__), 'saved_models', 'model.pth')
+    if no_test:     # Full dataset is training set
+        model_name = 'final_model.pth'
+    elif no_val:    # Training and validation sets are combined into one training set
+        model_name = 'second_model.pth'
+    else:           # Separate training, validation, and test sets
+        model_name = 'first_model.pth'
+
+    checkpoint_path = os.path.join(os.path.dirname(__file__), 'saved_models', model_name)
     torch.save(model.state_dict(), checkpoint_path)
 
 
