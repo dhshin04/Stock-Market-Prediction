@@ -5,9 +5,9 @@
 .env
 
 # Ignore pycache
-__pycache__/
-data/__pycache__/
+stock_market_predictor/__pycache__/
+stock_market_predictor/data/__pycache__/
 
 # Ignore everything in stocks folder except __init__.py due to memory constraints
-data/stocks/*
-!data/stocks/__init__.py
+stock_market_predictor/data/stocks/*
+!stock_market_predictor/data/stocks/__init__.py
