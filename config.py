@@ -29,10 +29,10 @@ dropout_rate = 0.25              # For Dropout Regularization
 learning_rate = 2e-6            # For Training - best 3e-6, try 1e-6 and 1e-5
 epochs = 60                     # For Training
 warmup_step = 10                # For LambdaLR Warmup
-weight_decay = 0.0005             # For AdamW 
+weight_decay = 0.0005           # For AdamW 
 T_max = epochs                  # For CosineAnnealingLR
 eta_min = learning_rate / 30    # For CosineAnnealingLR
 
 # Train Variation
 no_val = True                   # Use validation set for training as well
-no_test = False                 # Use test set for training as well
+no_test = True                  # Use test set for training as well
