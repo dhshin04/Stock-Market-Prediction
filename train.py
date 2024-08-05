@@ -29,7 +29,7 @@ def warmup(epoch):
     return 1.
 
 
-def train_one_epoch(epoch, model, train_loader, evaluation_loader, scaler, criterion, optimizer, scheduler, val_loss_list):
+def train_one_epoch(epoch, model, train_loader, evaluation_loader, scaler, criterion, optimizer, scheduler):
     # Train
     model.train()               # Train Mode: requires_grad=True, Batch Norm on
     train_loss_list = []        # Contains train loss per batch
@@ -59,37 +59,37 @@ def train_one_epoch(epoch, model, train_loader, evaluation_loader, scaler, crite
         optimizer.zero_grad()      # clear old gradient before new gradient calculation
         
     # Evaluate
-    if evaluation_loader is None:
-        return
+    if evaluation_loader is not None:
+        model.eval()            # Evaluation Mode: requires_grad=False, Batch Norm off
+        cv_loss_list = []       # Contains val loss per batch
+        accuracy_list = []      # List of accuracy (100 - MAPE)
 
-    model.eval()            # Evaluation Mode: requires_grad=False, Batch Norm off
-    cv_loss_list = []       # Contains val loss per batch
-    accuracy_list = []      # List of accuracy (100 - MAPE)
+        with torch.no_grad():   # No gradient calculation
+            for x_test, y_test in evaluation_loader:
+                x_test = x_test.to(DEVICE)
+                y_test = y_test.to(DEVICE)
 
-    with torch.no_grad():   # No gradient calculation
-        for x_test, y_test in evaluation_loader:
-            x_test = x_test.to(DEVICE)
-            y_test = y_test.to(DEVICE)
+                yhat = model(x_test)
 
-            yhat = model(x_test)
-            loss = torch.sqrt(criterion(yhat, y_test))      # RMSE Loss
+                if yhat.shape != y_test.shape:
+                    raise Exception('yhat and y_test are not the same shape')
+                
+                loss = torch.sqrt(criterion(yhat, y_test))      # RMSE Loss
 
-            if yhat.shape != y_test.shape:
-                raise Exception('yhat and y_test are not the same shape')
-
-            accuracy = metrics.accuracy(yhat, y_test, device=DEVICE)
-            
-            cv_loss_list.append(loss.item())
-            accuracy_list.append(
-                np.mean(accuracy)       # Average accuracy of batch
-            )
+                accuracy = metrics.accuracy(yhat, y_test, device=DEVICE)
+                
+                cv_loss_list.append(loss.item())
+                accuracy_list.append(
+                    np.mean(accuracy)       # Average accuracy of batch
+                )
+        end = time.time()
+        print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Test Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Elapsed Time: {end - start:.1f}s')
     
-    end = time.time()
-    print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Test Loss: {np.mean(cv_loss_list):.4f}, Average Accuracy: {np.mean(accuracy_list):.2f}%, Elapsed Time: {end - start:.1f}s')
+    else:
+        end = time.time()
+        print(f'Epoch: {(epoch + 1)}/{epochs}, Training Loss: {np.mean(train_loss_list):.4f}, Elapsed Time: {end - start:.1f}s')
     
     scheduler.step()            # Next step for warmup
-
-    val_loss_list.append(np.mean(cv_loss_list))
 
 
 def main():
@@ -128,11 +128,10 @@ def main():
     
     # Train and Evaluate Model
     print('Training...')
-    val_loss_list = []
     for epoch in range(epochs):
         train_one_epoch(
             epoch, model, train_loader, evaluation_loader, 
-            scaler, criterion, optimizer, scheduler, val_loss_list
+            scaler, criterion, optimizer, scheduler,
         )
         
     # Save Model
