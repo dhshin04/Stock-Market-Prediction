@@ -11,7 +11,7 @@ class StockPredictor(nn.Module):
         self.dilation = dilation
         self.label_size = label_size
         
-        # Define Neural Network
+        ## LSTM Model ##
         self.dropout = nn.Dropout(dropout_rate)
         
         # Replace 6 with out_channels if adding CNN
