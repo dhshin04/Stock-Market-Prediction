@@ -1,6 +1,6 @@
-import torch
+# TODO: Continue experimenting with different model architectures to reduce MAPE
+
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class StockPredictor(nn.Module):
