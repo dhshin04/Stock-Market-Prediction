@@ -37,4 +37,4 @@ eta_min = learning_rate / 30    # For CosineAnnealingLR
 
 # Train Variation
 no_val = True                   # Use validation set for training as well
-no_test = True                  # Use test set for training as well
+no_test = False                 # Use test set for training as well
