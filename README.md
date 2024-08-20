@@ -22,9 +22,9 @@ The training set consists of closing prices from earlier periods. After training
 
 The model currently achieves an accuracy of 84.62%, falling short of the target accuracy of 95%. Several factors might contribute to this:
 
-1. Suboptimal Hyperparameter and Model Architecture: Tuning these requires significant time and resources.
-2. Limited Dataset: The dataset contains only 15 tech stocks, which may limit the model's ability to generalize effectively. However, it’s important to consider that increasing the number of stocks would significantly expand the dataset, potentially slowing down the training process. This trade-off between dataset size and training speed must be carefully balanced to optimize model performance.
-3. Inefficient Data Preprocessing: The current method uses closing prices, but alternative approaches, such as using the direction of stock price changes, might yield better results.
+1. **Suboptimal Hyperparameter and Model Architecture**: Tuning these requires significant time and resources.
+2. **Limited Dataset**: The dataset contains only 15 tech stocks, which may limit the model's ability to generalize effectively. However, it’s important to consider that increasing the number of stocks would significantly expand the dataset, potentially slowing down the training process. This trade-off between dataset size and training speed must be carefully balanced to optimize model performance.
+3. **Inefficient Data Preprocessing**: The current method uses closing prices, but alternative approaches, such as using the direction of stock price changes, might yield better results.
 
 Additionally, techniques like applying a moving average and differencing the time series data showed minimal performance improvements with the current approach. Although these methods were not effective, the code remains in the project, commented out in the stock_market_predictor/data/read_csv.py file under the remove_noise() function for future testing.
 
@@ -40,9 +40,9 @@ The prediction algorithm is stored under stock_market_predictor/.
 - train.py: Contains train script
 - evaluate.py: Contains script to evaluate performance
 - metrics.py: Contains metrics like accuracy and directional accuracy
-- predict.py: TODO
+- predict.py: _TODO_
 
-TODO: test.py
+_TODO_: test.py
 
 performance.txt contains the current performance metrics of the model on the test set.
 
