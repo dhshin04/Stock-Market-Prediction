@@ -6,9 +6,7 @@ This repository contains code for a prediction algorithm designed to forecast th
 
 ## Project Description
 
-**Project Status: _Ongoing_**
-
-&nbsp;
+### Project Status: _Ongoing_
 
 _Frameworks and Tools: PyTorch, AWS, Nvidia NGC, Gemini API_
 
