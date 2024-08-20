@@ -7,9 +7,10 @@ This repository contains code for a prediction algorithm designed to forecast th
 ## Project Description
 
 _PyTorch, AWS, Nvidia NGC, Gemini API_
+
 _\*\*AWS EC2 and NGC used to leverage CUDA for faster training_
 
-**Project Status**: _Ongoing_
+**Project Status: _Ongoing_**
 
 This project aims to identify general patterns in the stock market that can be leveraged to predict future stock performance. To achieve this, 15 tech stocks are selected from diverse industry sectors using the Gemini API. The Gemini API provides a dynamic selection of tech stocks, ensuring that the dataset represents the broader tech industry rather than being limited to a static group of stocks. This dynamic selection helps create a dataset that can better generalize across different market conditions, improving the model's ability to make accurate predictions. Historical closing prices for these stocks are then gathered to create a time-series dataset.
 
