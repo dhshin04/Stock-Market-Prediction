@@ -6,9 +6,9 @@ This repository contains code for a prediction algorithm designed to forecast th
 
 ## Project Description
 
-_PyTorch, AWS, Nvidia NGC, Gemini API_
+_Frameworks and Tools: PyTorch, AWS, Nvidia NGC, Gemini API_
 
-_\*\*AWS EC2 and NGC used to leverage CUDA for faster training_
+_\*\*AWS EC2 and Nvidia NGC used to leverage CUDA for faster training_
 
 **Project Status: _Ongoing_**
 
