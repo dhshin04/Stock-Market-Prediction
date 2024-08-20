@@ -62,7 +62,7 @@ git clone https://github.com/dhshin04/Parasite-Egg-Detection.git
 pip install -r requirements.txt
 ```
 
-3. Import dataset from [Kaggle Dataset](https://www.kaggle.com/datasets/jacksoncrow/stock-market-dataset)
+3. Import dataset from [Kaggle Dataset](https://www.kaggle.com/datasets/jacksoncrow/stock-market-dataset).
 
 4. To run train script, do the following:
 
