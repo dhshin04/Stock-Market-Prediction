@@ -3,6 +3,38 @@ import pandas as pd
 import torch
 
 
+def remove_noise(dataframe, lag=5, ma_window=10):
+    '''
+    Use differencing and moving average to remove noise while preserving trend
+
+    Arguments:
+        dataframe (pd.DataFrame): Original dataframe without noise removal
+        lag (int): Size of lag for differencing
+        ma_window (int): Window size to compute moving average
+    Returns:
+        new_df (pd.DataFrame): New dataframe with noise removed
+    '''
+    new_df = pd.DataFrame(index=dataframe.index)
+    for column in dataframe:
+        # Get series
+        series = dataframe[column]
+
+        # Find series(t - lag)
+        series_lag = series.shift(lag)
+
+        # Calculate differenced series
+        series_diff = series - series_lag
+
+        # Calculate moving averages of lagged series and differenced series
+        ma_lag = series_lag.rolling(window=ma_window).mean()
+        ma_diff = series_diff.rolling(window=ma_window).mean()
+
+        # Add the two moving averages and add to dataframe
+        new_df[column] = ma_lag + ma_diff
+
+    return new_df.dropna()      # Remove NaN that could arise from differencing or moving average
+
+
 def get_stocks():
     # Returns list of csv file names in stocks folder except __init__.py
     stocks_list = os.listdir(os.path.join(os.path.dirname(__file__), 'stocks'))
@@ -57,6 +89,9 @@ def train_val_test_split(csv_files, train_split, test_split, no_val=False, no_te
         stock_path = os.path.join(stocks_path, csv_file)
 
         stock_data = pd.read_csv(stock_path, index_col='Date', parse_dates=['Date'])
+
+        # Apply moving average and differencing
+        # stock_data = remove_noise(stock_data, lag, ma_window)
         stock_data = stock_data.dropna()        # Remove NaN values from stock data
         
         series = torch.tensor(stock_data.values, dtype=torch.float32)
