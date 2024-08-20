@@ -16,7 +16,7 @@ This project aims to identify general patterns in the stock market that can be l
 
 The dataset is split into features and labels by date, and a sliding window with a shift size of 1 day is used to capture dynamic patterns in the stock market.
 
-The training set consists of closing prices from earlier periods. After training, the model is validated on a separate set of closing prices from later periods, excluding the most recent data. Once optimal hyperparameters are identified, the model is retrained, this time including the validation set in the training process. Finally, the model is tested on the most recent closing prices. If the model's performance meets the desired criteria, it is retrained one last time, incorporating the test set, to make predictions on real-time data.
+The training set consists of closing prices from earlier periods, which is then fed into a deep learning model with LSTM layers. After training, the model is validated on a separate set of closing prices from later periods, excluding the most recent data. Once optimal hyperparameters are identified, the model is retrained, this time including the validation set in the training process. Finally, the model is tested on the most recent closing prices. If the model's performance meets the desired criteria, it is retrained one last time, incorporating the test set, to make predictions on real-time data.
 
 ## Results
 
